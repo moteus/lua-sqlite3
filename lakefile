@@ -37,7 +37,7 @@ target('build', lsqlite3)
 install = target('install', {
   file.group{odir=J(INSTALL_DIR, 'share');src = 'sqlite3.lua'};
   file.group{odir=J(INSTALL_DIR, 'share', PROJECT);src = lsqlite3 };
-  target(J(INSTALL_DIR, 'share', "luasql.lua"), 'luasql-sqlite3.lua', '$(COPY) $(DEPENDS) $(TARGET)');
+  target(J(INSTALL_DIR, 'share', PROJECT, "luasql.lua"), 'luasql-sqlite3.lua', '$(COPY) $(DEPENDS) $(TARGET)');
   file.group{odir=J(INSTALL_DIR, 'examples'); src = 'examples' };
   file.group{odir=J(INSTALL_DIR, 'doc'); src = 'documentation.html' };
   file.group{odir=J(INSTALL_DIR, 'test'); src = 'tests*.lua'};

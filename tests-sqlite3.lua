@@ -33,6 +33,10 @@ local os = os
 
 local lunit = require "lunit"
 
+local getn = table.getn or function(t) return #t end
+
+local unpack = unpack or table.unpack
+
 -------------------------------
 -- Basic open and close test --
 -------------------------------
@@ -205,12 +209,12 @@ function test()
   assert_equal(2, stmt:column_count(), "Wrong number of columns." )
   
   local names = assert_table( stmt:column_names() )
-  assert_equal(2, table.getn(names), "Wrong number of names.")
+  assert_equal(2, getn(names), "Wrong number of names.")
   assert_equal("id", names[1] )
   assert_equal("name", names[2] )
   
   local types = assert_table( stmt:column_decltypes() )
-  assert_equal(2, table.getn(types), "Wrong number of declaration types.")
+  assert_equal(2, getn(types), "Wrong number of declaration types.")
   assert_equal("INTEGER", types[1] )
   assert_equal("TEXT", types[2] )
   
@@ -247,12 +251,12 @@ local function check_content(expected)
   local i = 0
   for row in stmt:irows() do
     i = i + 1
-    assert( i <= table.getn(expected), "To much rows." )
-    assert_equal(2, table.getn(row), "Two result column expected.")
+    assert( i <= getn(expected), "To much rows." )
+    assert_equal(2, getn(row), "Two result column expected.")
     assert_equal(i, row[1], "Wrong 'id'.")
     assert_equal(expected[i], row[2], "Wrong 'name'.")
   end
-  assert_equal( table.getn(expected), i, "To few rows." )
+  assert_equal( getn(expected), i, "To few rows." )
   assert_table( stmt:close() )
 end
 
@@ -405,7 +409,7 @@ function test_auto_parameter_names()
     INSERT INTO test VALUES($a3, $b3)
   ]]))
   local parameters = assert_table( stmt:parameter_names() )
-  assert_equal( 6, table.getn(parameters) )
+  assert_equal( 6, getn(parameters) )
   assert_equal( "a", parameters[1] )
   assert_equal( "b", parameters[2] )
   assert_equal( "a2", parameters[3] )
@@ -417,13 +421,13 @@ end
 function test_no_parameter_names_1()
   local stmt = assert_table( db:prepare([[ SELECT * FROM test ]]))
   local parameters = assert_table( stmt:parameter_names() )
-  assert_equal( 0, table.getn(parameters) )
+  assert_equal( 0, getn(parameters) )
 end
 
 function test_no_parameter_names_2()
   local stmt = assert_table( db:prepare([[ INSERT INTO test VALUES(?, ?) ]]))
   local parameters = assert_table( stmt:parameter_names() )
-  assert_equal( 0, table.getn(parameters) )
+  assert_equal( 0, getn(parameters) )
 end
 
 end

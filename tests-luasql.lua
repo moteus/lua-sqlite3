@@ -34,6 +34,7 @@ local os = os
 
 local lunit = require "lunit"
 
+local getn = table.getn or function(t) return #t end
 
 -------------------------------------------------
 -- This is the luaSql compatible sqlite driver --
@@ -167,14 +168,14 @@ end
 
 function test_getcolnames()
   local names = assert_table( cur:getcolnames() )
-  assert_equal(2, table.getn(names) )
+  assert_equal(2, getn(names) )
   assert_equal("id", names[1])
   assert_equal("item", names[2])
 end
 
 function test_getcoltypes()
   local types = assert_table( cur:getcoltypes() )
-  assert_equal(2, table.getn(types) )
+  assert_equal(2, getn(types) )
   assert_equal("INTEGER", types[1])
   assert_equal("TEXT", types[2])
 end
@@ -227,11 +228,11 @@ local function check(expected)
     assert_table(row)
     id = id + 1
     assert_equal(id, row.id, "Unexpected 'id' read (wrong row?)")
-    assert( id <= table.getn(expected), "'Id' read to large (to many rows?)")
+    assert( id <= getn(expected), "'Id' read to large (to many rows?)")
     assert_equal(expected[id], row.item, "Invalid content in row")
     row = cur:fetch({}, "a")
   end
-  assert_equal(id,  table.getn(expected), "To less rows read")
+  assert_equal(id,  getn(expected), "To less rows read")
   assert_true( cur:close() )
 end
 

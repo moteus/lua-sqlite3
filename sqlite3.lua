@@ -45,6 +45,10 @@ TODO:
 local core = require "sqlite3.core"
 local api, ERR, TYPE, AUTH = core.api, core.errors, core.types, core.auth
 
+local getn = table.getn or function(t) return #t end
+
+local unpack = unpack or table.unpack
+
 local db_class = { }
 local stmt_class = { }
 
@@ -55,7 +59,7 @@ local function check_stmt(stmt)
 end
 
 local function check_single_stmt(stmt)
-  assert(type(stmt.handles) == "table" and table.getn(stmt.handles) == 1, "Single prepared statement expected")
+  assert(type(stmt.handles) == "table" and getn(stmt.handles) == 1, "Single prepared statement expected")
   return stmt.handles[1]
 end
 
@@ -126,7 +130,7 @@ local function register(registry, object)
   local id = registry[1]
   if id == 0 then
     table.insert(registry, object)
-    return table.getn(registry)
+    return getn(registry)
   else
     registry[1] = registry[id]
     registry[id] = object
@@ -451,7 +455,7 @@ function db_class.prepare(db, paranames, sql)
           return nil, errmsg
         end
         
-        local stmt = create_stmt(db, handles, table.getn(fixed_parameter_names))
+        local stmt = create_stmt(db, handles, getn(fixed_parameter_names))
         stmt.mapping = mapping
         stmt.paranames = fixed_parameter_names
         
@@ -461,7 +465,7 @@ function db_class.prepare(db, paranames, sql)
         
         local parameter_names = collect_parameter_names(handles)
         local mapping = create_mapping(handles, parameter_names)
-        local stmt = create_stmt(db, handles, table.getn(parameter_names))
+        local stmt = create_stmt(db, handles, getn(parameter_names))
         stmt.mapping = mapping
         stmt.paranames = parameter_names
         
@@ -584,7 +588,8 @@ end
 ---------------------
 
 function stmt_class.bind(stmt, ...)
-  
+  local arg = {...}  arg.n = select("#", ...)
+
   local function bind_with_mapping(parameters)
     local mapping = stmt.mapping
     local map_index = 1
