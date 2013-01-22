@@ -42,17 +42,11 @@ TODO:
 
 
 
-
-
-require "libluasqlite3-loader"
-
-local api, ERR, TYPE, AUTH = load_libluasqlite3()
+local core = require "sqlite3.core"
+local api, ERR, TYPE, AUTH = core.api, core.errors, core.types, core.auth
 
 local db_class = { }
 local stmt_class = { }
-
-
-
 
 
 local function check_stmt(stmt)
@@ -153,7 +147,7 @@ end
 -- sqlite3 --
 -------------
 
-sqlite3 = { }
+local sqlite3 = { }
 
 function sqlite3.open(filename)
   check_string(filename, "Filename as string expected")
@@ -840,4 +834,7 @@ function stmt_class.first_cols(stmt, autoclose)
 end
 
 
+local IS_LUA_52 = not not (table.unpack and not _G.setfenv)
+if not IS_LUA_52 then _G.sqlite3 = sqlite3 end
 
+return sqlite3

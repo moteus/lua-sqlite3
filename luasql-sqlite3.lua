@@ -27,6 +27,7 @@
 --]]--------------------------------------------------------------------------
 
 
+local luasql = luasql
 
 if luasql == nil then
   luasql = { }
@@ -46,6 +47,7 @@ local env_class_mt  = { __index = env_class }
 local conn_class_mt = { __index = conn_class }
 local cur_class_mt  = { __index = cur_class }
 
+local core 
 local api, ERR, TYPE, AUTH
 
 local function setref(t, v)	t.ref_counter = v end
@@ -57,8 +59,9 @@ local function isref(t)		return t.ref_counter > 0 end
 
 
 function luasql.sqlite3()
-  if not api then 
-    api, ERR, TYPE, AUTH = load_libluasqlite3()
+  if not core then 
+    core = require "sqlite3.core"
+    api, ERR, TYPE, AUTH = core.api, core.errors, core.types, core.auth
   end
   
   local env = setmetatable( {}, env_class_mt )
@@ -266,5 +269,7 @@ function  cur_class.getcoltypes(cur)
 end
 
 
+local IS_LUA_52 = not not (table.unpack and not _G.setfenv)
+if not IS_LUA_52 then _G.luasql = luasql end
 
-
+return luasql

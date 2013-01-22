@@ -46,6 +46,22 @@
  *
  */
 
+#if LUA_VERSION_NUM >= 502 
+
+int luaL_typerror (lua_State *L, int narg, const char *tname) {
+  const char *msg = lua_pushfstring(L, "%s expected, got %s", tname,
+      luaL_typename(L, narg));
+  return luaL_argerror(L, narg, msg);
+}
+
+void luaL_register (lua_State *L, const char *libname, const luaL_Reg *l){
+  if(libname) lua_newtable(L);
+  luaL_setfuncs(L, l, 0);
+}
+
+#define lua_strlen lua_rawlen
+
+#endif 
 
 
 #define IS_INT(n)		( ( (lua_Number) ((int)(n)) )  == (n) )
@@ -1629,13 +1645,17 @@ d_entry auth_entries[] = {
 
 int luaopen_sqlite3(lua_State * L)
 {
+  lua_newtable(L);
   f(L, api_entries);
+  lua_setfield(L, -2, "api");
   d(L, error_entries);
+  lua_setfield(L, -2, "errors");
   d(L, type_entries);
+  lua_setfield(L, -2, "types");
   d(L, auth_entries);
+  lua_setfield(L, -2, "auth");
   
-  return 4;	/* api, error codes, type codes, auth requests */
+  return 1;	/* api, error codes, type codes, auth requests */
 }
 
-
-
+int luaopen_sqlite3_core(lua_State * L){ return luaopen_sqlite3(L); }
