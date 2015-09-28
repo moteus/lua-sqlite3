@@ -1,0 +1,18 @@
+return {
+  configfile  = ".luacov",
+  statsfile   = "luacov.stats.out",
+  reportfile  = "luacov.report.json",
+  runreport   = false,
+  deletestats = false,
+  include = {
+    "/sqlite3$",
+    "/sqlite3/.+$",
+  },
+  exclude = {
+  },
+  coveralls = {
+    pathcorrect = {
+      {"^.-/share/lua/5.%d/", "src/lua/"};
+    },
+  },
+}

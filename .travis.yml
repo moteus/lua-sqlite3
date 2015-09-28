@@ -30,7 +30,7 @@ script:
   - lunit.sh tests.lua
 
 after_success:
-  - coveralls --dump c.report.json
+  - coveralls -i libluasqlite3.c --dump c.report.json
   - luacov-coveralls -j c.report.json -v
 
 notifications:
