@@ -33,15 +33,15 @@ local luasql = require "sqlite3.luasql"
 local os = os
 
 local lunit = require "lunit"
+local TEST_CASE = lunit.TEST_CASE
 
 local getn = table.getn or function(t) return #t end
 
 -------------------------------------------------
 -- This is the luaSql compatible sqlite driver --
 -------------------------------------------------
-local TEST_NAME = "Driver Interface"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
+local _ENV = TEST_CASE"Driver Interface" do
+
 function test()
   assert_table( luasql )
   assert_function( luasql.sqlite3 )
@@ -53,10 +53,10 @@ function test()
   assert_nil( env:close(), "Closing a closed environment must return 'nil'" )
 end
 
+end
 
-local TEST_NAME = "Connection Interface"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
+local _ENV = TEST_CASE"Connection Interface" do
+
 function test()
   local env = assert_table( luasql.sqlite3() )
   local con = assert_table( env:connect_memory() )
@@ -70,10 +70,10 @@ function test()
   assert_true( env:close() )
 end
 
+end
 
-local TEST_NAME = "Simple connection usage"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
+local _ENV = TEST_CASE"Simple connection usage" do
+
 function test()
   local env = assert_table( luasql.sqlite3() )
   local con = assert_table( env:connect_memory() )
@@ -83,10 +83,10 @@ function test()
   assert_true( env:close() )
 end
 
+end
 
-local TEST_NAME = "Cursor Interface"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
+local _ENV = TEST_CASE"Cursor Interface" do
+
 function test()
   local env = assert_table( luasql.sqlite3() )
   local con = assert_table( env:connect_memory() )
@@ -102,11 +102,9 @@ function test()
   assert_true( env:close() )
 end
 
+end
 
-local TEST_NAME = "Simple cursor usage"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
-do
+local _ENV = TEST_CASE"Simple cursor usage" do
 
 local env, con, cur
 
@@ -182,11 +180,7 @@ end
 
 end
 
-
-local TEST_NAME = "Transaction Tests"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
-do
+local _ENV = TEST_CASE"Transaction Tests" do
 
 local env, con, cur
 

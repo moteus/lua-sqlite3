@@ -32,6 +32,7 @@ local sqlite3 = require "sqlite3"
 local os = os
 
 local lunit = require "lunit"
+local TEST_CASE = lunit.TEST_CASE
 
 local getn = table.getn or function(t) return #t end
 
@@ -40,10 +41,7 @@ local unpack = unpack or table.unpack
 -------------------------------
 -- Basic open and close test --
 -------------------------------
-local TEST_NAME = 'tests-sqlite3'
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
-do
+local _ENV = TEST_CASE'tests-sqlite3' do
 
 function test_open_memory()
   local db = assert_table( sqlite3.open_memory() )
@@ -62,10 +60,7 @@ end
 -------------------------------------
 -- Presence of db member functions --
 -------------------------------------
-local TEST_NAME = "Database Member Functions"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
-do
+local _ENV = TEST_CASE"Database Member Functions" do
 
 local db
 
@@ -98,10 +93,7 @@ end
 ---------------------------------------
 -- Presence of stmt member functions --
 ---------------------------------------
-local TEST_NAME = "Statement Member Functions"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
-do
+local _ENV = TEST_CASE"Statement Member Functions" do
 local db, stmt
 
 function setup()
@@ -135,10 +127,7 @@ end
 ------------------
 -- Tests basics --
 ------------------
-local TEST_NAME = "Basics"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
-do
+local _ENV = TEST_CASE"Basics" do
 local db, stmt
 
 function setup()
@@ -196,10 +185,7 @@ end
 ---------------------------------
 -- Statement Column Info Tests --
 ---------------------------------
-local TEST_NAME = "Column Info Test"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
-do
+local _ENV = TEST_CASE"Column Info Test" do
 
 function test()
   local db = assert_table( sqlite3.open_memory() )
@@ -227,10 +213,7 @@ end
 ---------------------
 -- Statement Tests --
 ---------------------
-local TEST_NAME = "Statement Tests"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
-do
+local _ENV = TEST_CASE"Statement Tests" do
 
 local db
 
@@ -385,10 +368,7 @@ end
 --------------------------------
 -- Tests binding of arguments --
 --------------------------------
-local TEST_NAME = "Binding Tests"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
-do
+local _ENV = TEST_CASE"Binding Tests" do
 
 local db
 
@@ -436,14 +416,10 @@ end
 -- Tests loop break and statement reusage --
 --------------------------------------------
 
-
 ----------------------------
 -- Test for bugs reported --
 ----------------------------
-local TEST_NAME = "Bug-Report Tests"
-if _VERSION >= 'Lua 5.2' then  _ENV = lunit.module(TEST_NAME,'seeall')
-else module( TEST_NAME, package.seeall, lunit.testcase ) end
-do
+local _ENV = TEST_CASE"Bug-Report Tests" do
 
 local db
 
