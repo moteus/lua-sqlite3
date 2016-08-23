@@ -735,6 +735,13 @@ FUNC( l_sqlite3_errcode )
 }
 
 
+FUNC( l_sqlite3_extended_errcode )
+{
+  lua_pushnumber(L, sqlite3_extended_errcode(checkdb_sqlite3(L, 1)) );
+  return 1;
+}
+
+
 FUNC( l_sqlite3_errmsg )
 {
   lua_pushstring(L, sqlite3_errmsg(checkdb_sqlite3(L, 1)) );
@@ -796,7 +803,7 @@ FUNC( l_sqlite3_prepare )
   
   init_callback_usage(L, db); 	/* Needed by trace handler... FIXME: maybe to be removed... */
   
-  error = sqlite3_prepare(db->sqlite3, sql, sql_size, &sqlite3_stmt, &leftover);
+  error = sqlite3_prepare_v2(db->sqlite3, sql, sql_size, &sqlite3_stmt, &leftover);
   
   leftover_size = leftover ? sql + sql_size - leftover : 0;
   
