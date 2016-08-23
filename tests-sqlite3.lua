@@ -43,16 +43,36 @@ local unpack = unpack or table.unpack
 -------------------------------
 local _ENV = TEST_CASE'tests-sqlite3' do
 
+local db, filename
+
+function setup()
+  filename, db = "./__lua-sqlite3-20040906135849." .. os.time()
+end
+
+function teardown()
+  if db then db:close() end
+  os.remove(filename)
+end
+
 function test_open_memory()
-  local db = assert_table( sqlite3.open_memory() )
-  assert( db:close() )
+  db = assert_table( sqlite3.open_memory() )
 end
 
 function test_open()
-  local filename = "./__lua-sqlite3-20040906135849." .. os.time()
-  local db = assert_table( sqlite3.open(filename) )
-  assert( db:close() )
-  os.remove(filename)
+  db = assert_table( sqlite3.open(filename) )
+end
+
+function test_open_uri()
+  db = assert_table( sqlite3.open_uri("file:"..filename) )
+end
+
+function test_open_uri_with_mode()
+  db = assert_table( sqlite3.open_uri("file:"..filename.."?mode=rwc") )
+end
+
+function test_fail_open_uri_create()
+  -- no create flag
+  db = assert_nil( sqlite3.open_uri("file:"..filename.."?mode=rw") )
 end
 
 end
@@ -465,3 +485,4 @@ function test_nils()   -- appeared in lua-5.1 (holes in arrays)
 end
 
 end
+

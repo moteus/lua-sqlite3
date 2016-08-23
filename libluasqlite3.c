@@ -770,7 +770,8 @@ FUNC( l_sqlite3_last_insert_rowid )
 }
 
 
-static int l_sqlite_check_open_flag(lua_State *L, int idx){
+static int l_sqlite_check_open_flag(lua_State *L, int idx)
+{
   int flags;
   if(lua_istable(L, 2)) {
     int top = lua_gettop(L);
@@ -795,6 +796,7 @@ FUNC( l_sqlite3_open )
   int flags = lua_isnoneornil(L, 2) ? 0 : l_sqlite_check_open_flag(L, 2);
   int error;
   
+  
   if(flags)
   {
     error = sqlite3_open_v2(checkstr(L, 1), &sqlite3, flags, NULL);
@@ -816,7 +818,6 @@ FUNC( l_sqlite3_open )
   
   return 2;	/* error code, database */
 }
-
 
 
 FUNC( l_sqlite3_prepare )
@@ -875,7 +876,6 @@ FUNC( l_sqlite3_total_changes )
 }
 
 
-
 static int exec_callback_wrapper(void * cb_data, int num_columns, char ** values, char ** names)
 {
   int index;
@@ -925,7 +925,6 @@ FUNC( l_sqlite3_exec )
   lua_pushnumber(L, sqlite3_exec(db->sqlite3, checkstr(L, 2), cb, cb_data, 0) );
   return 1;
 }
-
 
 
 static void func_callback_wrapper(int which, sqlite3_context * ctx, int num_args, sqlite3_value ** values)
@@ -1092,8 +1091,6 @@ FUNC( l_sqlite3_collation_needed )
 }
 
 
-
-
 static void xtrace_callback_wrapper(void * cb_data, const char * str)
 {
   DB *		db = CB_DATA(cb_data)->db;
@@ -1125,8 +1122,6 @@ FUNC( l_sqlite3_trace )
   lua_pushnumber(L, SQLITE_OK);
   return 1;
 }
-
-
 
 
 FUNC( l_sqlite3_result_null )

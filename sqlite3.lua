@@ -43,7 +43,7 @@ TODO:
 
 
 local core = require "sqlite3.core"
-local api, ERR, TYPE, AUTH = core.api, core.errors, core.types, core.auth
+local api, ERR, TYPE, AUTH, FLAGS = core.api, core.errors, core.types, core.auth, core.flags
 
 local getn = table.getn or function(t) return #t end
 
@@ -153,15 +153,24 @@ end
 
 local sqlite3 = { }
 
+-- export flags
+for name, value in pairs(FLAGS) do
+  sqlite3[name] = value
+end
+
 function sqlite3.open(filename, flags)
   check_string(filename, "Filename as string expected")
   
   local status, handle = api.open(filename, flags)
-  
   if is_error(status) then
-    local errmsg = errmsg(handle)
-    api.close(handle)
-    return nil, errmsg
+    local msg
+    if handle then
+      msg = errmsg(handle)
+      api.close(handle)
+    else
+      msg = string.format('Error code: %d', status)
+    end
+    return nil, msg
   end
   
   local db = object()
@@ -181,6 +190,31 @@ function sqlite3.open_memory(flags)
 end
 
 
+if FLAGS.OPEN_URI then
+
+function sqlite3.open_uri(filename, flags)
+  if flags then
+    if type(flags) == 'number' then
+      flags = {flags, FLAGS.OPEN_URI}
+    else
+      local o = {FLAGS.OPEN_URI}
+      for _, flag in ipairs(flags) do
+        o[#o + 1] = o
+      end
+      flags = o
+    end
+  else
+    -- according documentation if we do not set either 
+    -- SQLITE_OPEN_READONLY, SQLITE_OPEN_READWRITE or SQLITE_OPEN_CREATE
+    -- then sqlite3_open_v2() has undefined behavior.
+    -- even if we redefine mode in uri we still have to set one of that flag
+    flags = FLAGS.OPEN_URI + FLAGS.OPEN_READWRITE + FLAGS.OPEN_CREATE
+  end
+
+  return sqlite3.open(filename, flags)
+end
+
+end
 
 --------------------
 -- Database Class --
