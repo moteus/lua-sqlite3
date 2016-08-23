@@ -32,6 +32,17 @@ local has_lunit = not not lunit
 
 local lunit = require "lunit"
 
+local sqlite3 = require "sqlite3"
+
+print("------------------------------------")
+print("Module    name: " .. sqlite3._NAME);
+print("Module version: " .. sqlite3._VERSION);
+print("SQLite version: " .. sqlite3.version());
+print("SQLite  thread: " .. sqlite3.threadsafe());
+print("Lua    version: " .. (_G.jit and _G.jit.version or _G._VERSION))
+print("------------------------------------")
+print("")
+
 require "tests-sqlite3"
 require "tests-luasql"
 

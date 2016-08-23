@@ -359,10 +359,6 @@ static int checknilornoneorfunc(lua_State * L, int narg)
 }
 
 
-
-
-
-
 FUNC( l_sqlite3_bind_null )
 {
   lua_pushnumber(L, sqlite3_bind_null(checkstmt_stmt(L, 1), checkint(L, 2)) );
@@ -1352,6 +1348,19 @@ FUNC( l_sqlite3_libversion )
   return 1;
 }
 
+FUNC( l_sqlite3_libversion_number )
+{
+  lua_pushinteger(L, sqlite3_libversion_number() );
+  return 1;
+}
+
+
+FUNC( l_sqlite3_threadsafe )
+{
+  lua_pushnumber(L, sqlite3_threadsafe() );
+  return 1;
+}
+
 
 int xcommit_callback_wrapper(void * cb_data)
 {
@@ -1610,7 +1619,9 @@ f_entry api_entries[] = {
   { "value_text",		l_sqlite3_value_text },
   { "value",			l_sqlite3_value },
   { "value_type",		l_sqlite3_value_type },
+  { "threadsafe",		l_sqlite3_threadsafe },
   { "libversion",		l_sqlite3_libversion },
+  { "libversion_number",	l_sqlite3_libversion_number },
   { "commit_hook",		l_sqlite3_commit_hook },
   { "progress_handler",		l_sqlite3_progress_handler },
   { "busy_handler",		l_sqlite3_busy_handler },

@@ -40,7 +40,8 @@ TODO:
 
 --]]
 
-
+local _VERSION = '0.4.2-dev'
+local _NAME    = 'Lua-Sqlite3'
 
 local core = require "sqlite3.core"
 local api, ERR, TYPE, AUTH, FLAGS = core.api, core.errors, core.types, core.auth, core.flags
@@ -111,7 +112,7 @@ local function errname(status)
 end
 
 local function errmsg(status, db_handle)
-  local msg  = db_handle and api.errmsg(db_handle) or api.errstr(status) or "Unknown error"
+  local msg  = db_handle and api.errmsg(db_handle) or (api.errstr and api.errstr(status)) or "Unknown error"
   local name = errname(status)
   local ext  = db_handle and api.extended_errcode(db_handle)
   local ext_name
@@ -181,10 +182,35 @@ end
 
 local sqlite3 = { }
 
+sqlite3._NAME    = _NAME
+sqlite3._VERSION = _VERSION
+
 -- export flags
 for name, value in pairs(FLAGS) do
   sqlite3[name] = value
 end
+
+
+function sqlite3.version()
+  return api.libversion()
+end
+
+
+function sqlite3.version_number(unpack)
+  local n = api.libversion_number()
+  if not unpack then return n end
+  local major, minor, patch 
+  patch = n % 1000 n = math.floor(n / 1000)
+  minor = n % 1000 n = math.floor(n / 1000)
+  major = n
+  return major, minor, patch 
+end
+
+
+function sqlite3.threadsafe()
+  return api.threadsafe()
+end
+
 
 function sqlite3.open(filename, flags)
   check_string(filename, "Filename as string expected")
