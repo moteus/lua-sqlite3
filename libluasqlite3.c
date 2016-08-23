@@ -770,13 +770,42 @@ FUNC( l_sqlite3_last_insert_rowid )
 }
 
 
+static int l_sqlite_check_open_flag(lua_State *L, int idx){
+  int flags;
+  if(lua_istable(L, 2)) {
+    int top = lua_gettop(L);
+    flags = 0;
+    lua_pushnil(L);
+    while (lua_next(L, -2)) {
+      luaL_checkint(L, -2);
+      flags |= luaL_checkint(L, -1);
+      lua_pop(L, 1);
+    }
+    lua_settop(L, top);
+  }
+  else {
+    flags = luaL_checkint(L, idx);
+  }
+  return flags;
+}
+
 FUNC( l_sqlite3_open )
 {
   sqlite3 * sqlite3 	= 0;
-  int error 		= sqlite3_open(checkstr(L, 1), &sqlite3);
+  int flags = lua_isnoneornil(L, 2) ? 0 : l_sqlite_check_open_flag(L, 2);
+  int error;
   
+  if(flags)
+  {
+    error = sqlite3_open_v2(checkstr(L, 1), &sqlite3, flags, NULL);
+  }
+  else
+  {
+    error = sqlite3_open(checkstr(L, 1), &sqlite3);
+  }
+
   lua_pushnumber(L, error);
-  
+
   if (sqlite3)
   {
     DB * db = (DB *) lua_newuserdata(L, sizeof(DB));
@@ -787,6 +816,7 @@ FUNC( l_sqlite3_open )
   
   return 2;	/* error code, database */
 }
+
 
 
 FUNC( l_sqlite3_prepare )
@@ -1584,6 +1614,7 @@ f_entry api_entries[] = {
 
 #define SC(NAME) { #NAME, SQLITE_##NAME }
 
+
 d_entry error_entries[] = {
   SC(OK),
   SC(ERROR),
@@ -1796,6 +1827,72 @@ SC(OK_LOAD_PERMANENTLY),
   { 0, 0 }
 };
 
+
+d_entry flags_entries[] = {
+#ifdef SQLITE_OPEN_READONLY
+SC(OPEN_READONLY),
+#endif
+#ifdef SQLITE_OPEN_READWRITE
+SC(OPEN_READWRITE),
+#endif
+#ifdef SQLITE_OPEN_CREATE
+SC(OPEN_CREATE),
+#endif
+#ifdef SQLITE_OPEN_DELETEONCLOSE
+SC(OPEN_DELETEONCLOSE),
+#endif
+#ifdef SQLITE_OPEN_EXCLUSIVE
+SC(OPEN_EXCLUSIVE),
+#endif
+#ifdef SQLITE_OPEN_AUTOPROXY
+SC(OPEN_AUTOPROXY),
+#endif
+#ifdef SQLITE_OPEN_URI
+SC(OPEN_URI),
+#endif
+#ifdef SQLITE_OPEN_MEMORY
+SC(OPEN_MEMORY),
+#endif
+#ifdef SQLITE_OPEN_MAIN_DB
+SC(OPEN_MAIN_DB),
+#endif
+#ifdef SQLITE_OPEN_TEMP_DB
+SC(OPEN_TEMP_DB),
+#endif
+#ifdef SQLITE_OPEN_TRANSIENT_DB
+SC(OPEN_TRANSIENT_DB),
+#endif
+#ifdef SQLITE_OPEN_MAIN_JOURNAL
+SC(OPEN_MAIN_JOURNAL),
+#endif
+#ifdef SQLITE_OPEN_TEMP_JOURNAL
+SC(OPEN_TEMP_JOURNAL),
+#endif
+#ifdef SQLITE_OPEN_SUBJOURNAL
+SC(OPEN_SUBJOURNAL),
+#endif
+#ifdef SQLITE_OPEN_MASTER_JOURNAL
+SC(OPEN_MASTER_JOURNAL),
+#endif
+#ifdef SQLITE_OPEN_NOMUTEX
+SC(OPEN_NOMUTEX),
+#endif
+#ifdef SQLITE_OPEN_FULLMUTEX
+SC(OPEN_FULLMUTEX),
+#endif
+#ifdef SQLITE_OPEN_SHAREDCACHE
+SC(OPEN_SHAREDCACHE),
+#endif
+#ifdef SQLITE_OPEN_PRIVATECACHE
+SC(OPEN_PRIVATECACHE),
+#endif
+#ifdef SQLITE_OPEN_WAL
+SC(OPEN_WAL),
+#endif
+  { 0, 0 }
+};
+
+
 #undef SC
 
 d_entry type_entries[] = {
@@ -1852,6 +1949,8 @@ int luaopen_sqlite3(lua_State * L)
   lua_setfield(L, -2, "types");
   d(L, auth_entries);
   lua_setfield(L, -2, "auth");
+  d(L, flags_entries);
+  lua_setfield(L, -2, "flags");
   
   return 1;	/* api, error codes, type codes, auth requests */
 }

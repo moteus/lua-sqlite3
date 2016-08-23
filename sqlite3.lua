@@ -153,10 +153,10 @@ end
 
 local sqlite3 = { }
 
-function sqlite3.open(filename)
+function sqlite3.open(filename, flags)
   check_string(filename, "Filename as string expected")
   
-  local status, handle = api.open(filename)
+  local status, handle = api.open(filename, flags)
   
   if is_error(status) then
     local errmsg = errmsg(handle)
@@ -176,8 +176,8 @@ function sqlite3.open(filename)
 end
 
 
-function sqlite3.open_memory()
-  return sqlite3.open(":memory:")
+function sqlite3.open_memory(flags)
+  return sqlite3.open(":memory:", flags)
 end
 
 
