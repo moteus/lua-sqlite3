@@ -28,10 +28,14 @@
 
 pcall(require, "luacov")
 
+local has_lunit = not not lunit
+
 local lunit = require "lunit"
 
 require "tests-sqlite3"
 require "tests-luasql"
 
-lunit.run()
+if not has_lunit then
+  lunit.run()
+end
 

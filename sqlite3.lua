@@ -45,6 +45,11 @@ TODO:
 local core = require "sqlite3.core"
 local api, ERR, TYPE, AUTH, FLAGS = core.api, core.errors, core.types, core.auth, core.flags
 
+local ERR_NAMES = {}
+for name, value in pairs(ERR) do
+  ERR_NAMES[value] = name
+end
+
 local getn = table.getn or function(t) return #t end
 
 local unpack = unpack or table.unpack
@@ -101,10 +106,33 @@ local function is_done(status)
   return status == ERR.DONE
 end
 
-local function errmsg(db_handle)
-  return api.errmsg(db_handle) or "Unknown error"
+local function errname(status)
+  return ERR_NAMES[status] or 'UNKNOWN'
 end
 
+local function errmsg(status, db_handle)
+  local msg  = db_handle and api.errmsg(db_handle) or api.errstr(status) or "Unknown error"
+  local name = errname(status)
+  local ext  = db_handle and api.extended_errcode(db_handle)
+  local ext_name
+  if ext and (ext ~= status) then
+    ext_name = errname(status)
+  else
+    ext = nil
+  end
+
+  if ext then
+    return string.format(
+      "[SQLITE][%s][%s] %s(%d/%d)",
+      name, ext_name, msg, status, ext
+    )
+  end
+
+  return string.format(
+    "[SQLITE][%s] %s(%d)",
+    name, msg, status
+  )
+end
 
 
 -------------------------------------------------------------------------
@@ -163,13 +191,8 @@ function sqlite3.open(filename, flags)
   
   local status, handle = api.open(filename, flags)
   if is_error(status) then
-    local msg
-    if handle then
-      msg = errmsg(handle)
-      api.close(handle)
-    else
-      msg = string.format('Error code: %d', status)
-    end
+    msg = errmsg(status, handle)
+    if handle then api.close(handle) end
     return nil, msg
   end
   
@@ -232,7 +255,7 @@ function db_class.close(db)
   local status = api.close(db.handle)
   
   if is_error(status) then
-    return nil, errmsg(db.handle)
+    return nil, errmsg(status, db.handle)
   end
   
   db.handle = nil
@@ -249,7 +272,7 @@ function db_class.interrupt(db)
   local status = api.interrupt(db.handle)
   
   if is_error(status) then
-    return nil, errmsg(db.handle)
+    return nil, errmsg(status, db.handle)
   end
   
   return db
@@ -281,7 +304,7 @@ function db_class.exec(db, sql)
   local status = api.exec(db.handle, sql)
   
   if is_error(status) then
-    return nil, errmsg(db.handle)
+    return nil, errmsg(status, db.handle)
   end
   
   return db
@@ -357,7 +380,7 @@ function db_class.prepare(db, paranames, sql)
       status, handle, remaining = api.prepare(db.handle, remaining)
       
       if is_error(status) then
-        local errmsg = errmsg(db.handle)
+        local errmsg = errmsg(status, db.handle)
         cleanup(handles)
         return nil, errmsg
       end
@@ -546,7 +569,7 @@ function db_class.set_function(db, name, num_args, func)
   local status = api.create_function(db.handle, name, num_args, xfunc, nil, nil)
   
   if is_error(status) then
-    return nil, errmsg(db.handle)
+    return nil, errmsg(status, db.handle)
   end
   
   return db
@@ -577,7 +600,7 @@ function db_class.set_aggregate(db, name, num_args, create_funcs)
   local status = api.create_function(db.handle, name, num_args, nil, xstep, xfinal)
   
   if is_error(status) then
-    return nil, errmsg(db.handle)
+    return nil, errmsg(status, db.handle)
   end
   
   return db
@@ -588,7 +611,7 @@ function db_class.set_trace_handler(db, func)
   check_db(db)
   local status = api.trace(db.handle, func)
   if is_error(status) then
-    return nil, errmsg(db.handle)
+    return nil, errmsg(status, db.handle)
   end
   return db
 end
@@ -598,7 +621,7 @@ function db_class.set_busy_timeout(db, ms)
   check_db(db)
   local status = api.busy_timeout(db.handle, ms)
   if is_error(status) then
-    return nil, errmsg(db.handle)
+    return nil, errmsg(status, db.handle)
   end
   return db
 end
@@ -608,7 +631,7 @@ function db_class.set_busy_handler(db, func)
   check_db(db)
   local status = api.busy_handler(db.handle, func)
   if is_error(status) then
-    return nil, errmsg(db.handle)
+    return nil, errmsg(status, db.handle)
   end
   return db
 end
@@ -631,7 +654,7 @@ function stmt_class.bind(stmt, ...)
       for index = 1, api.bind_parameter_count(handle) do
         local status = api.bind(handle, index,  parameters[mapping[map_index]])
         if is_error(status) then
-          return nil, errmsg(stmt.db.handle)
+          return nil, errmsg(status, stmt.db.handle)
         end
         map_index = map_index + 1
       end
@@ -644,7 +667,7 @@ function stmt_class.bind(stmt, ...)
       for index = 1, api.bind_parameter_count(handle) do
         local status = api.bind(handle, index, parameters[parameter_index])
         if is_error(status) then
-          return nil, errmsg(stmt.db.handle)
+          return nil, errmsg(status, stmt.db.handle)
         end
         parameter_index = parameter_index + 1
       end
@@ -658,7 +681,7 @@ function stmt_class.bind(stmt, ...)
       for index = 1, api.bind_parameter_count(handle) do
         local status = api.bind(handle, index, parameters[parameter_names[mapping[index]]])
         if is_error(status) then
-          return nil, errmsg(stmt.db.handle)
+          return nil, errmsg(status, stmt.db.handle)
         end
       end
     end
@@ -754,7 +777,7 @@ function stmt_class.exec(stmt)
       local status = api.step(handle)
       
       if is_error(status) then
-        local errmsg = errmsg(stmt.db.handle)
+        local errmsg = errmsg(status, stmt.db.handle)
         api.reset(handle)
         return nil, errmsg
       end
@@ -785,7 +808,7 @@ local function stmt_rows(stmt, get_row_func, tab, autoclose)
     local status = api.step(handle)
     
     if is_error(status) then
-      local errmsg = errmsg(stmt.db.handle)
+      local errmsg = errmsg(status, stmt.db.handle)
       check_autoclose()
       return nil, errmsg
     end
@@ -833,7 +856,7 @@ local function first_row(stmt, get_row_func, tab, autoclose)
   local status = api.step(handle)
   
   if is_error(status) then
-    local errmsg = errmsg(stmt.db.handle)
+    local errmsg = errmsg(status, stmt.db.handle)
     check_autoclose()
     return nil, errmsg
   end

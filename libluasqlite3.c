@@ -749,6 +749,13 @@ FUNC( l_sqlite3_errmsg )
 }
 
 
+FUNC( l_sqlite3_errstr )
+{
+  lua_pushstring(L, sqlite3_errstr(checkint(L, 1)) );
+  return 1;
+}
+
+
 FUNC( l_sqlite3_finalize )
 {
   lua_pushnumber(L, sqlite3_finalize(checkstmt_stmt(L, 1)) );
@@ -1564,6 +1571,8 @@ f_entry api_entries[] = {
   { "data_count",		l_sqlite3_data_count },
   { "errcode",			l_sqlite3_errcode },
   { "errmsg",			l_sqlite3_errmsg },
+  { "errstr",			l_sqlite3_errstr },
+  { "extended_errcode",		l_sqlite3_extended_errcode },
   { "finalize",			l_sqlite3_finalize },
   { "interrupt",		l_sqlite3_interrupt },
   { "last_insert_rowid",	l_sqlite3_last_insert_rowid },
