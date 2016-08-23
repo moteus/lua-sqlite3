@@ -78,7 +78,7 @@ void luaL_register (lua_State *L, const char *libname, const luaL_Reg *l){
 
 #define FUNC(name)		static int name (lua_State * L)
 
-
+#define L_SQLITE_VERSION_GE(MINOR, MAJOR, PATCH) (((MINOR * 1000*1000) + (MAJOR * 1000) + PATCH) <= SQLITE_VERSION_NUMBER)
 
 #define CB_DATA(ptr)		CAST(CB_Data *, (ptr))
 
@@ -749,11 +749,15 @@ FUNC( l_sqlite3_errmsg )
 }
 
 
+#if L_SQLITE_VERSION_GE(3, 7, 15)
+
 FUNC( l_sqlite3_errstr )
 {
   lua_pushstring(L, sqlite3_errstr(checkint(L, 1)) );
   return 1;
 }
+
+#endif
 
 
 FUNC( l_sqlite3_finalize )
@@ -1571,7 +1575,9 @@ f_entry api_entries[] = {
   { "data_count",		l_sqlite3_data_count },
   { "errcode",			l_sqlite3_errcode },
   { "errmsg",			l_sqlite3_errmsg },
+#if L_SQLITE_VERSION_GE(3, 7, 15)
   { "errstr",			l_sqlite3_errstr },
+#endif
   { "extended_errcode",		l_sqlite3_extended_errcode },
   { "finalize",			l_sqlite3_finalize },
   { "interrupt",		l_sqlite3_interrupt },
