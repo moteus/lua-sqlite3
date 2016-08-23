@@ -789,14 +789,14 @@ static int l_sqlite_check_open_flag(lua_State *L, int idx)
     flags = 0;
     lua_pushnil(L);
     while (lua_next(L, -2)) {
-      luaL_checkint(L, -2);
-      flags |= luaL_checkint(L, -1);
+      checkint(L, -2);
+      flags |= checkint(L, -1);
       lua_pop(L, 1);
     }
     lua_settop(L, top);
   }
   else {
-    flags = luaL_checkint(L, idx);
+    flags = checkint(L, idx);
   }
   return flags;
 }
