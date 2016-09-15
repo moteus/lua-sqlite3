@@ -213,8 +213,15 @@ You can open a database that resides in a file on a disc, or you could open a da
 -- Open a file database
 db = sqlite3.open("filename")
 
+-- Open readonly database
+db = sqlite3.open("filename", sqlite3.OPEN_READONLY)
+
 -- Open a temporary database in memory
 db = sqlite3.open_memory()
+
+-- Open database based on URI
+db = sqlite3.open_uri("file:filename?mode=r")
+
 </pre>
 <p class="text">
 To close a database you invoke the method db:close(). Because this call is a method on the database object, you must use a colon (':') to separate the method name from the object name:
