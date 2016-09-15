@@ -90,7 +90,6 @@ local function check_number(num, msg)
 end
 
 
-
 -----------------------------------------------------
 -- Error test und report helper for sqlite3 errors --
 -----------------------------------------------------
@@ -171,9 +170,6 @@ local function unregister(registry, id)
   registry[id] = registry[1]
   registry[1] = id
 end
-
-
-
 
 
 -------------
@@ -663,9 +659,6 @@ function db_class.set_busy_handler(db, func)
 end
 
 
-
-
-
 ---------------------
 -- Statement Class --
 ---------------------
@@ -922,7 +915,8 @@ function stmt_class.first_cols(stmt, autoclose)
 end
 
 
-local IS_LUA_52 = not not (table.unpack and not _G.setfenv)
-if not IS_LUA_52 then _G.sqlite3 = sqlite3 end
+if string.find(_G._VERSION, '5.1', nil, true) then
+  _G.sqlite3 = sqlite3
+end
 
 return sqlite3
