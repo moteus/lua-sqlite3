@@ -40,7 +40,7 @@ TODO:
 
 --]]
 
-local _VERSION = '0.4.2-dev'
+local _VERSION = '0.4.1.1'
 local _NAME    = 'Lua-Sqlite3'
 
 local core = require "sqlite3.core"

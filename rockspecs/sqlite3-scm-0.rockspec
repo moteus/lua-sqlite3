@@ -19,7 +19,7 @@ dependencies = {
 
 external_dependencies = {
   SQLITE = {
-      header = "sqlite3.h"
+    header = "sqlite3.h"
   }
 }
 
